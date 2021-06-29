@@ -16,11 +16,13 @@ public class FruitApp {
 
         System.out.println("Вес коробки с яблоками: " + appleBox.getBoxWeight());
         System.out.println("Вес коробки с апельсинами: " + orangeBox.getBoxWeight());
-
         System.out.println("Вес коробок равен? - " + appleBox.compare(orangeBox));
 
-        appleBox.transfer(appleBox1, apple);
+        appleBox.transfer(appleBox1);
+        appleBox.transfer(appleBox1);
+        appleBox.transfer(appleBox1);
 
-        System.out.println("Вес коробок равен? - " + orangeBox.compare(appleBox1));
+        System.out.println("Вес первой коробки с яблоками: " + appleBox.getBoxWeight());
+        System.out.println("Вес второй коробки с яблоками: " + appleBox1.getBoxWeight());
     }
 }
