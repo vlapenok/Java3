@@ -4,8 +4,8 @@
 <?import javafx.scene.layout.*?>
 <VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.261" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
     <HBox fx:id="authPanel">
-        <TextField fx:id="userNameField" onAction="#auth" promptText="Введите имя пользователя" HBox.hgrow="ALWAYS" />
-        <TextField fx:id="passField" onAction="#auth" promptText="Введите пароль" HBox.hgrow="ALWAYS" />
+        <TextField fx:id="loginField" promptText="Введите имя пользователя" HBox.hgrow="ALWAYS" />
+        <PasswordField fx:id="passField" onAction="#auth" promptText="Введите пароль" HBox.hgrow="ALWAYS" />
         <Button onAction="#auth" text="Авторизоваться" />
     </HBox>
     <HBox VBox.vgrow="ALWAYS">

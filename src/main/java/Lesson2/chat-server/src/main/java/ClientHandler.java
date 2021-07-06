@@ -8,7 +8,8 @@ public class ClientHandler {
     private Server server;
     private Socket socket;
     private String nickName;
-    private String userName;
+    private String login;
+    private String password;
     private DataInputStream in;
     private DataOutputStream out;
 
@@ -33,7 +34,7 @@ public class ClientHandler {
         try {
             while (!authentication(in.readUTF())) ;
             while (readIncomingMsg(in.readUTF())) ;
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         } finally {
             System.out.println("Клиент " + nickName + " отключился");
@@ -76,22 +77,20 @@ public class ClientHandler {
     }
 
     // Метод для чтения сообщений об авторизации
-    private boolean authentication(String msg) {
+    private boolean authentication(String msg) throws SQLException {
         if (msg.startsWith("/auth ")) { // Получение команды для авторизации на сервере
             String[] authText = msg.split("\\s+"); // Разбитие строки по пробелам
-            if (authText.length > 3) {
-                sendMessage("Server: Имя или пароль не может состоять из нескольких слов");
-                return false;
-            } else if (authText.length < 3) {
-                sendMessage("Server: Имя или пароль не может быть пустым");
+            if (authText.length != 3) {
+                sendMessage("Server: Неверная комбинация логи/пароль");
                 return false;
             } else if (authText[1].startsWith("/")) {
                 sendMessage("Server: Имя не может начинаться на \"/\"");
                 return false;
             } else {
-                userName = authText[1];
-                String pass = authText[2];
-                if (authService(userName, pass)) { // Вызов метода обращения к БД
+                login = authText[1];
+                password = authText[2];
+                nickName = server.getAuthenticationProvider().getNickByLoginAndPassword(login, password);
+                if (nickName != null) { // Вызов метода обращения к БД
                     if (server.chekUserName(nickName)) {
                         sendMessage("/authOk " + nickName); // Отправка команды об успешной авторизации
                         server.subscribe(this); // Добавление данного клиента в список
@@ -111,7 +110,7 @@ public class ClientHandler {
         }
     }
 
-    private boolean readIncomingMsg(String msg) {
+    private boolean readIncomingMsg(String msg) throws SQLException {
         if (msg.startsWith("/")) {
             if (msg.equals("/exit")) { // команда для выхода пользователя из чата
                 sendMessage(msg);
@@ -125,9 +124,10 @@ public class ClientHandler {
                 }
                 server.personalSendMessage(this, personalText[1], personalText[2]);
                 return true;
-            } else if(msg.startsWith("/ch")) { // Команда для смены никнейма
+            } else if(msg.startsWith("/ch ")) { // Команда для смены никнейма
                 String[] newNick = msg.split("\\s+");
-                ChatDb.updateUsers(newNick[1], userName);
+                server.getAuthenticationProvider().updateNickname(newNick[1], login);
+//                nickName = server.getAuthenticationProvider().getNickByLoginAndPassword() ДОДЕЛАТЬ смену ника
                 sendMessage("Server: Авторизуйтесь заново для обновления");
                 sendMessage("/exit");
                 return false;
@@ -136,21 +136,5 @@ public class ClientHandler {
         }
         server.broadcastMessage(nickName + ": " + msg);
         return true;
-    }
-
-    private boolean authService(String userName, String pass) {
-        try {
-            String databaseAnswer = ChatDb.readTable(userName, pass);
-            if(databaseAnswer.equals("/error")) {
-                return false;
-            }
-            else {
-                nickName = databaseAnswer;
-                return true;
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return false;
     }
 }

@@ -8,14 +8,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
+import java.net.SocketException;
 
 public class Controller {
     @FXML
     TextArea textArea;
 
     @FXML
-    TextField textField, userNameField, passField;
+    TextField textField, loginField;
+
+    @FXML PasswordField passField;
 
     @FXML
     Label userNameLabel;
@@ -52,10 +54,10 @@ public class Controller {
 
     public void sendCloseRequest() { // Метод отправки команды на выход из чата
         try {
-            if (out != null) {
+            if (!socket.isClosed()) {
                 out.writeUTF("/exit");
             }
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -65,8 +67,8 @@ public class Controller {
             return;
         }
         try {
-            out.writeUTF("/auth " + userNameField.getText() + " " + passField.getText());
-            userNameField.clear();
+            out.writeUTF("/auth " + loginField.getText() + " " + passField.getText());
+            loginField.clear();
             passField.clear();
         } catch (IOException e) {
             showError("Ошибка авторизации");

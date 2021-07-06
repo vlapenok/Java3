@@ -7,23 +7,33 @@ import java.util.List;
 
 public class Server {
     private List<ClientHandler> clients; // Список клиентов
+    private AuthenticationProvider authenticationProvider;
+
+    public AuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
+    }
 
     Server() {
         try {
+            authenticationProvider = new ChatDb();
+            authenticationProvider.start();
+            authenticationProvider.insertUser("Bob", "bob", "123");
+            authenticationProvider.insertUser("Jack", "jack", "456");
+            authenticationProvider.insertUser("John", "john", "789");
             this.clients = new ArrayList<>();
             ServerSocket serverSocket = new ServerSocket(8189);
-            ChatDb.connect();
-            ChatDb.createTable();
             System.out.println("Сервер запущен с портом " + serverSocket.getLocalPort());
             while (true) {
                 Socket socket = serverSocket.accept(); // Бесконечно ждём подключения новых клиентов
                 System.out.println("Соединение с клиентом установлено");
                 ClientHandler clientHandler = new ClientHandler(this, socket); // Создание объекта обработчика клиентов
             }
-        } catch (IOException | SQLException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            ChatDb.disconnect();
+            if (authenticationProvider != null) {
+                authenticationProvider.disconnect();
+            }
         }
     }
     // Два метода для добавления/удаления клиента в список

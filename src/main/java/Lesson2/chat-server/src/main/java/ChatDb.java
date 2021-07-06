@@ -1,34 +1,38 @@
 import java.sql.*;
 
-public class ChatDb {
+public class ChatDb implements AuthenticationProvider {
 
-    private static Connection connection;
-    private static Statement statement;
-    private static PreparedStatement ps;
+    private Connection connection;
+    private Statement statement;
 
-    public static void main(String[] args) {
+    @Override
+    public void start() {
         try {
-            connect();
-            createTable();
-            insertUser("Bob", "bob", "123");
-            insertUser("Jack", "jack", "456");
-            insertUser("John", "john", "789");
-//            readTable();
-//            dropTable();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            disconnect();
+            connect(); // Подключаемся к базе
+            createTable(); // Создаем таблицу
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
-    public static void connect() throws SQLException {
+    private void connect() throws SQLException {
         connection = DriverManager.getConnection("jdbc:sqlite:chat.db");
         statement = connection.createStatement();
         System.out.println("Подключились к базе");
     }
 
-    public static void disconnect() {
+    private void createTable() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS users (\n" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "nick TEXT NOT NULL,\n" +
+                "login TEXT NOT NULL,\n" +
+                "pass TEXT NOT NULL);";
+        statement.executeUpdate(sql);
+        System.out.println("Создали таблицу");
+    }
+
+    @Override
+    public void disconnect() {
         if (statement != null) {
             try {
                 statement.close();
@@ -46,17 +50,8 @@ public class ChatDb {
         }
     }
 
-    public static void createTable() throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS users (\n" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                "nick TEXT NOT NULL,\n" +
-                "login TEXT NOT NULL,\n" +
-                "pass TEXT NOT NULL);";
-        statement.executeUpdate(sql);
-        System.out.println("Создали таблицу");
-    }
-
-    public static void insertUser(String nick, String login, String pass) throws SQLException {
+    @Override
+    public void insertUser(String nick, String login, String pass) {
 //        String sql = "INSERT INTO users (nick, login, pass) values ('" + nick + "', '" + login + "', '" + pass + "');";
 //        statement.executeUpdate(sql);
         String sql = "INSERT INTO users (nick, login, pass) VALUES (?, ?, ?);";
@@ -65,28 +60,41 @@ public class ChatDb {
             ps.setString(2, login);
             ps.setString(3, pass);
             ps.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
-    public static void dropTable() throws SQLException {
-        statement.execute("DROP TABLE users");
-        System.out.println("Удалили таблицу");
+    @Override
+    public void dropTable() {
+        try {
+            statement.execute("DROP TABLE users");
+            System.out.println("Удалили таблицу");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
-    public static String readTable(String userName, String pass) throws SQLException {
+    @Override
+    public String getNickByLoginAndPassword(String login, String pass) {
         String sql = "SELECT * FROM users WHERE login = ? AND pass = ?;";
-        ps = connection.prepareStatement(sql);
-        ps.setString(1, userName);
-        ps.setString(2, pass);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getString("nick");
-        } else {
-            return "/error";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, login);
+            ps.setString(2, pass);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("nick");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
+        return null;
     }
-    public static void updateUsers(String newNick, String login) {
-        try(PreparedStatement ps = connection.prepareStatement("UPDATE users SET nick = ? WHERE login = ?;")) {
+
+    @Override
+    public void updateNickname(String newNick, String login) {
+        String sql = "UPDATE users SET nick = ? WHERE login = ?;";
+        try(PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, newNick);
             ps.setString(2, login);
             ps.execute();
