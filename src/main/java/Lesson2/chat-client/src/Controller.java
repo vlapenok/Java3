@@ -4,9 +4,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -31,6 +29,8 @@ public class Controller {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    private File historyMsgFile;
+    private String nickname;
 
     // Метод скрытия-открытия панелей в зависимости от статуса авторизации
     private void setAuthorized(boolean authorized) {
@@ -54,7 +54,7 @@ public class Controller {
 
     public void sendCloseRequest() { // Метод отправки команды на выход из чата
         try {
-            if (!socket.isClosed()) {
+            if (out != null && !socket.isClosed()) {
                 out.writeUTF("/exit");
             }
         } catch (IOException | NullPointerException e) {
@@ -98,12 +98,16 @@ public class Controller {
         try {
             while (true) { // Цикл чтения сообщений для авторизации
                 String inputMsg = in.readUTF();
+                // Сделать, чтобы можно было закрыть соединение при неудачной авторизации
                 if (inputMsg.equals("/exit")) {
                     closeConnection();
+                    break;
                 }
                 if (inputMsg.startsWith("/authOk ")) {
-                    Platform.runLater(() -> userNameLabel.setText(inputMsg.split("\\s+")[1]));
+                    nickname = inputMsg.split("\\s+")[1];
+                    Platform.runLater(() -> userNameLabel.setText(nickname));
                     setAuthorized(true);
+//                    createHistoryFile();
                     break;
                 }
                 textArea.appendText(inputMsg + "\n");
@@ -126,6 +130,7 @@ public class Controller {
                     continue;
                 }
                 textArea.appendText(echoText + "\n");
+                writeHistorytoFile(historyMsgFile, echoText);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -170,6 +175,22 @@ public class Controller {
             textField.setText("/w " + selectedUser + " ");
             textField.requestFocus();
             textField.selectEnd();
+        }
+    }
+
+    private void createHistoryFile() throws IOException {
+        historyMsgFile = new File("history_" + nickname + ".txt");
+            if (!historyMsgFile.exists()) {
+                historyMsgFile.createNewFile();
+            }
+    }
+
+    private void writeHistorytoFile(File historyMsgFile, String message) {
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(historyMsgFile, true));
+            bufferedWriter.write(message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
