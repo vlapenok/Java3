@@ -6,7 +6,8 @@ import javafx.scene.layout.HBox;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Controller {
     @FXML
@@ -15,7 +16,8 @@ public class Controller {
     @FXML
     TextField textField, loginField;
 
-    @FXML PasswordField passField;
+    @FXML
+    PasswordField passField;
 
     @FXML
     Label userNameLabel;
@@ -30,7 +32,10 @@ public class Controller {
     private DataInputStream in;
     private DataOutputStream out;
     private File historyMsgFile;
+    private BufferedOutputStream bos;
     private String nickname;
+    private List<String> listOfMessageHistory = new LinkedList<>();
+    private final int linesNumberOfMsgHistory = 100;
 
     // Метод скрытия-открытия панелей в зависимости от статуса авторизации
     private void setAuthorized(boolean authorized) {
@@ -107,7 +112,8 @@ public class Controller {
                     nickname = inputMsg.split("\\s+")[1];
                     Platform.runLater(() -> userNameLabel.setText(nickname));
                     setAuthorized(true);
-//                    createHistoryFile();
+                    createHistoryFile();
+                    addHistoryToList(historyMsgFile, linesNumberOfMsgHistory);
                     break;
                 }
                 textArea.appendText(inputMsg + "\n");
@@ -130,7 +136,7 @@ public class Controller {
                     continue;
                 }
                 textArea.appendText(echoText + "\n");
-                writeHistorytoFile(historyMsgFile, echoText);
+                writeHistoryToFile(historyMsgFile, echoText + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -166,10 +172,18 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        try {
+            if (bos != null) {
+                bos.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    // Метод обработки двойного клика по списку пользователей
     @FXML
-    private void doubleClicked(MouseEvent event) { // Метод обработки двойного клика по списку пользователей
+    private void doubleClicked(MouseEvent event) {
         if (event.getClickCount() == 2) {
             String selectedUser = clientsListView.getSelectionModel().getSelectedItem();
             textField.setText("/w " + selectedUser + " ");
@@ -178,17 +192,44 @@ public class Controller {
         }
     }
 
-    private void createHistoryFile() throws IOException {
+    // Создание файла для записи истории сообщений
+    private void createHistoryFile() {
         historyMsgFile = new File("history_" + nickname + ".txt");
-            if (!historyMsgFile.exists()) {
+        if (!historyMsgFile.exists()) {
+            try {
                 historyMsgFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
     }
 
-    private void writeHistorytoFile(File historyMsgFile, String message) {
+    // Запись истории сообщений в файл
+    private void writeHistoryToFile(File historyMsgFile, String message) {
+        byte[] bites = (message).getBytes();
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(historyMsgFile, true));
-            bufferedWriter.write(message + "\n");
+            bos = new BufferedOutputStream(new FileOutputStream(historyMsgFile, true));
+            bos.write(bites);
+            bos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addHistoryToList(File historyMsgFile, int lines) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(historyMsgFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                listOfMessageHistory.add(line);
+                if (listOfMessageHistory.size() > lines) {
+                    listOfMessageHistory.remove(0);
+                }
+            }
+            for(String str : listOfMessageHistory) {
+                textArea.appendText(str + "\n");
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

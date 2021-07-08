@@ -1,0 +1,150 @@
+Server: К нам присоединяется Bob
+Bob: 1
+Bob: 2
+Bob: 3
+Bob: 4
+Bob: 5
+Bob: 6
+Bob: 7
+Bob: 8
+Bob: 9
+Bob: 10
+Server: К нам присоединяется Bob
+Bob: ghfgh
+Bob: fghdf
+Bob: ghdf
+Bob: gh
+Bob: dfgh
+Bob: dfg
+Bob: h
+Bob: 
+Bob: fgh dfghfgh
+Bob: fg dfghdfgh
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Bob: 
+Bob: 
+Bob: 
+Server: К нам присоединяется Bob
+Bob: zdfgsdfg
+Bob: dfgdfg
+Bob: dfgdfg
+Bob: dfgdfg
+Bob: df
+Bob: gd
+Bob: fg
+Bob: df
+Bob: g
+Bob: df
+Bob: g
+Bob: d
+Bob: df
+Bob: g
+Bob: 678
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Bob: 1
+Bob: 2
+Bob: 3
+Bob: 4
+Bob: 5
+Bob: 6
+Bob: 7
+Bob: 8
+Bob: 9
+Bob: 10
+Bob: bye
+Server: К нам присоединяется Bob
+Bob: 1
+Bob: 2
+Bob: 3
+Bob: 4
+Bob: 5
+Bob: 6
+Bob: 7
+Bob: 8
+Bob: 9
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Bob: 1
+Bob: 2
+Bob: 3
+Bob: 4
+Bob: 5
+Bob: 6
+Bob: 7
+Bob: 7
+Bob: 8
+Bob: 
+Bob: 9
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+452
+4245
+252
+78
+27
+2
+782
+78
+2
+7
+27
+96
+97
+Server: К нам присоединяется Bob
+Bob: 99
+Bob: 100
+Bob: 101
+Bob: 102
+Bob: 103
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Bob: fgjhd
+Bob: dfgh
+Bob: dghdgj
+Bob: ghj
+Bob: ghj
+Bob: gh
+Bob: j
+Bob: g
+Bob: 159
+Server: К нам присоединяется Bob
+Bob: fgfg
+Bob: hfg
+Bob: hdfg
+Bob: hdf
+Bob: ghrr5y45y
+Bob: g
+Bob: bb
+Bob: dr
+Bob: h  ghfgh
+Bob: fgh
+Bob: fghdfghdfh dfghyt drtyeh ryrt tyht
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Bob: 
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Jack
+ЛС для Jack: dfgsdfgsd
+от Jack: sdfgsdfgsd
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
