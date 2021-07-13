@@ -148,3 +148,6 @@ Server: К нам присоединяется Jack
 Server: К нам присоединяется Bob
 Server: К нам присоединяется Bob
 Server: К нам присоединяется Bob
+Server: К нам присоединяется Bob
+Bob: xvbxfb
+Bob: xvcbncvbn
