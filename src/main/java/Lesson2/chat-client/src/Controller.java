@@ -4,11 +4,10 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Controller {
     @FXML
@@ -17,7 +16,8 @@ public class Controller {
     @FXML
     TextField textField, loginField;
 
-    @FXML PasswordField passField;
+    @FXML
+    PasswordField passField;
 
     @FXML
     Label userNameLabel;
@@ -31,6 +31,11 @@ public class Controller {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    private File historyMsgFile;
+    private BufferedOutputStream bos;
+    private String nickname;
+    private List<String> listOfMessageHistory = new LinkedList<>();
+    private final int linesNumberOfMsgHistory = 100;
 
     // Метод скрытия-открытия панелей в зависимости от статуса авторизации
     private void setAuthorized(boolean authorized) {
@@ -54,7 +59,7 @@ public class Controller {
 
     public void sendCloseRequest() { // Метод отправки команды на выход из чата
         try {
-            if (!socket.isClosed()) {
+            if (out != null && !socket.isClosed()) {
                 out.writeUTF("/exit");
             }
         } catch (IOException | NullPointerException e) {
@@ -98,12 +103,17 @@ public class Controller {
         try {
             while (true) { // Цикл чтения сообщений для авторизации
                 String inputMsg = in.readUTF();
+                // Сделать, чтобы можно было закрыть соединение при неудачной авторизации
                 if (inputMsg.equals("/exit")) {
                     closeConnection();
+                    break;
                 }
                 if (inputMsg.startsWith("/authOk ")) {
-                    Platform.runLater(() -> userNameLabel.setText(inputMsg.split("\\s+")[1]));
+                    nickname = inputMsg.split("\\s+")[1];
+                    Platform.runLater(() -> userNameLabel.setText(nickname));
                     setAuthorized(true);
+                    createHistoryFile();
+                    addHistoryToList(historyMsgFile, linesNumberOfMsgHistory);
                     break;
                 }
                 textArea.appendText(inputMsg + "\n");
@@ -126,6 +136,7 @@ public class Controller {
                     continue;
                 }
                 textArea.appendText(echoText + "\n");
+                writeHistoryToFile(historyMsgFile, echoText + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -161,15 +172,66 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        try {
+            if (bos != null) {
+                bos.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    // Метод обработки двойного клика по списку пользователей
     @FXML
-    private void doubleClicked(MouseEvent event) { // Метод обработки двойного клика по списку пользователей
+    private void doubleClicked(MouseEvent event) {
         if (event.getClickCount() == 2) {
             String selectedUser = clientsListView.getSelectionModel().getSelectedItem();
             textField.setText("/w " + selectedUser + " ");
             textField.requestFocus();
             textField.selectEnd();
+        }
+    }
+
+    // Создание файла для записи истории сообщений
+    private void createHistoryFile() {
+        historyMsgFile = new File("history_" + nickname + ".txt");
+        if (!historyMsgFile.exists()) {
+            try {
+                historyMsgFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Запись истории сообщений в файл
+    private void writeHistoryToFile(File historyMsgFile, String message) {
+        byte[] bites = (message).getBytes();
+        try {
+            bos = new BufferedOutputStream(new FileOutputStream(historyMsgFile, true));
+            bos.write(bites);
+            bos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addHistoryToList(File historyMsgFile, int lines) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(historyMsgFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                listOfMessageHistory.add(line);
+                if (listOfMessageHistory.size() > lines) {
+                    listOfMessageHistory.remove(0);
+                }
+            }
+            for(String str : listOfMessageHistory) {
+                textArea.appendText(str + "\n");
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
