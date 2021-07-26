@@ -3,6 +3,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
     private Server server;
@@ -12,6 +14,7 @@ public class ClientHandler {
     private String password;
     private DataInputStream in;
     private DataOutputStream out;
+    private ExecutorService fixedExecutor;
 
     public String getNickName() {
         return nickName;
@@ -21,10 +24,12 @@ public class ClientHandler {
         try {
             this.server = server;
             this.socket = socket;
-            this.in = new DataInputStream(socket.getInputStream());
-            this.out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            fixedExecutor = Executors.newSingleThreadExecutor();
             // Поток для чтения сообщений от сервера
-            new Thread(() -> logic()).start();
+//            new Thread(() -> logic()).start();
+            fixedExecutor.execute(() -> logic());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -65,6 +70,7 @@ public class ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        fixedExecutor.shutdown();
     }
 
     // Метод отправки сообщений неавторизованному клиенту
