@@ -1,24 +1,23 @@
-package Lesson4;
+package Lesson4.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainApp {
+public class WaitAndNotifyApp {
+    static List<String> list = new ArrayList<>();
 
-    public static void main(String[] args) throws InterruptedException {
-        List<String> list = new ArrayList<>();
-
-        Thread thread1 = new Thread(new Runnable() {
+    public static void main(String[] args) {
+        Thread producer = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    while(true) {
-                        synchronized(list) {
-                            Thread.sleep(200);
-                            while(list.size() > 10) {
+                    while (true) {
+                        synchronized (list) {
+                            Thread.sleep(100);
+                            while(list.size() > 20) {
                                 list.wait();
                             }
-                            list.add(" ");
+                            list.add("str");
                             list.notifyAll();
                         }
                     }
@@ -27,8 +26,9 @@ public class MainApp {
                 }
             }
         });
+        producer.start();
 
-        Thread thread2 = new Thread(new Runnable() {
+        Thread consumer = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -49,13 +49,15 @@ public class MainApp {
                 }
             }
         });
-
-        thread1.start();
-        thread2.start();
+        consumer.start();
 
         while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             System.out.println(list.size());
-            Thread.sleep(1000);
         }
     }
 }
